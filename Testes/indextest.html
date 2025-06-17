@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Calculadora Geográfica</title>
+  <link rel="stylesheet" href="static/css/style.css">
+  <!-- Importe as fontes e os ícones se necessário, por exemplo: -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-content">
+        <h1>Calculadora Geográfica</h1>
+        <p class="tagline">Soluções geodésicas precisas</p>
+        <div class="global-datum">
+          <label for="datumGlobalSelect">Datum:</label>
+          <select id="datumGlobalSelect">
+            <option value="WGS84">WGS84</option>
+            <option value="SIRGAS2000">SIRGAS2000</option>
+            <option value="SAD69">SAD69</option>
+            <option value="CORREGO_ALEGRE">CORREGO_ALEGRE</option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navegação por abas -->
+    <nav class="tabs">
+      <button class="tab-button active" data-tab="distanciaTab">
+        <span class="material-icons-outlined">straighten</span>
+        Distância
+      </button>
+      <button class="tab-button" data-tab="areaTab">
+        <span class="material-icons-outlined">square_foot</span>
+        Área
+      </button>
+      <button class="tab-button" data-tab="azimuteTab">
+        <span class="material-icons-outlined">explore</span>
+        Azimute
+      </button>
+      <button class="tab-button" data-tab="utmTab">
+        <span class="material-icons-outlined">grid_view</span>
+        UTM
+      </button>
+      <button class="tab-button" data-tab="novasCoordenadasTab">
+        <span class="material-icons-outlined">navigation</span>
+        Novas Coordenadas
+      </button>
+      <button class="tab-button" data-tab="conversaoUnidadesTab">
+        <span class="material-icons-outlined">swap_horiz</span>
+        Conversão de Unidades
+      </button>
+      <button class="tab-button" data-tab="decimalDmsTab">
+        <span class="material-icons-outlined">settings_input_component</span>
+        Decimal → DMS
+      </button>
+      <button class="tab-button" data-tab="dmsDecimalTab">
+        <span class="material-icons-outlined">calculate</span>
+        DMS → Decimal
+      </button>
+    </nav>
+
+    <!-- Painel Distância -->
+    <div id="distanciaTab" class="calculator-panel active">
+      <h3>Calcular Distância</h3>
+      <div class="form-grid">
+        <div class="input-group">
+          <label for="dist_lat1">Latitude 1</label>
+          <input type="number" id="dist_lat1" placeholder="Ex: -23.5505">
+        </div>
+        <div class="input-group">
+          <label for="dist_lon1">Longitude 1</label>
+          <input type="number" id="dist_lon1" placeholder="Ex: -46.6333">
+        </div>
+        <div class="input-group">
+          <label for="dist_lat2">Latitude 2</label>
+          <input type="number" id="dist_lat2" placeholder="Ex: -22.9068">
+        </div>
+        <div class="input-group">
+          <label for="dist_lon2">Longitude 2</label>
+          <input type="number" id="dist_lon2" placeholder="Ex: -43.1729">
+        </div>
+      </div>
+      <button data-result="#resultadoDistancia">Calcular Distância</button>
+      <div id="resultadoDistancia" class="result"></div>
+    </div>
+
+    <!-- Painel Área -->
+    <div id="areaTab" class="calculator-panel">
+      <h3>Calcular Área (Triângulo)</h3>
+      <div class="form-grid">
+        <div class="input-group">
+          <label for="area_latA">Latitude A</label>
+          <input type="number" id="area_latA">
+        </div>
+        <div class="input-group">
+          <label for="area_lonA">Longitude A</label>
+          <input type="number" id="area_lonA">
+        </div>
+        <div class="input-group">
+          <label for="area_latB">Latitude B</label>
+          <input type="number" id="area_latB">
+        </div>
+        <div class="input-group">
+          <label for="area_lonB">Longitude B</label>
+          <input type="number" id="area_lonB">
+        </div>
+        <div class="input-group">
+          <label for="area_latC">Latitude C</label>
+          <input type="number" id="area_latC">
+        </div>
+        <div class="input-group">
+          <label for="area_lonC">Longitude C</label>
+          <input type="number" id="area_lonC">
+        </div>
+      </div>
+      <button data-result="#resultadoArea">Calcular Área</button>
+      <div id="resultadoArea" class="result"></div>
+    </div>
+
+    <!-- Painel Azimute -->
+    <div id="azimuteTab" class="calculator-panel">
+      <h3>Calcular Azimute</h3>
+      <div class="form-grid">
+        <div class="input-group">
+          <label for="azimute_lat1">Latitude 1</label>
+          <input type="number" id="azimute_lat1">
+        </div>
+        <div class="input-group">
+          <label for="azimute_lon1">Longitude 1</label>
+          <input type="number" id="azimute_lon1">
+        </div>
+        <div class="input-group">
+          <label for="azimute_lat2">Latitude 2</label>
+          <input type="number" id="azimute_lat2">
+        </div>
+        <div class="input-group">
+          <label for="azimute_lon2">Longitude 2</label>
+          <input type="number" id="azimute_lon2">
+        </div>
+      </div>
+      <button data-result="#resultadoAzimute">Calcular Azimute</button>
+      <div id="resultadoAzimute" class="result"></div>
+    </div>
+
+    <!-- Painel UTM -->
+    <div id="utmTab" class="calculator-panel">
+      <h3>Converter para UTM</h3>
+      <div class="form-grid">
+        <div class="input-group">
+          <label for="utm_lat">Latitude</label>
+          <input type="number" id="utm_lat">
+        </div>
+        <div class="input-group">
+          <label for="utm_lon">Longitude</label>
+          <input type="number" id="utm_lon">
+        </div>
+      </div>
+      <button data-result="#resultadoUTM">Converter para UTM</button>
+      <div id="resultadoUTM" class="result"></div>
+    </div>
+
+    <!-- Painel Novas Coordenadas -->
+    <div id="novasCoordenadasTab" class="calculator-panel">
+      <h3>Calcular Novas Coordenadas</h3>
+      <div class="form-grid">
+        <div class="input-group">
+          <label for="novascoords_lat">Latitude Inicial</label>
+          <input type="number" id="novascoords_lat">
+        </div>
+        <div class="input-group">
+          <label for="novascoords_lon">Longitude Inicial</label>
+          <input type="number" id="novascoords_lon">
+        </div>
+        <div class="input-group">
+          <label for="novascoords_distancia">Distância (m)</label>
+          <input type="number" id="novascoords_distancia">
+        </div>
+        <div class="input-group">
+          <label for="novascoords_azimute">Azimute (°)</label>
+          <input type="number" id="novascoords_azimute">
+        </div>
+      </div>
+      <button data-result="#resultadoNovasCoordenadas">Calcular Novas Coordenadas</button>
+      <div id="resultadoNovasCoordenadas" class="result"></div>
+    </div>
+
+    <!-- Painel Conversão de Unidades -->
+    <div id="conversaoUnidadesTab" class="calculator-panel">
+      <h3>Conversão de Unidades</h3>
+      <div class="form-grid">
+        <div class="input-group">
+          <label for="valorConversao">Valor</label>
+          <input type="number" id="valorConversao">
+        </div>
+        <div class="input-group">
+          <label for="unidadeOrigem">Unidade Origem</label>
+          <input type="text" id="unidadeOrigem" placeholder="ex: km">
+        </div>
+        <div class="input-group">
+          <label for="unidadeDestino">Unidade Destino</label>
+          <input type="text" id="unidadeDestino" placeholder="ex: milhas">
+        </div>
+      </div>
+      <button data-result="#resultadoConversaoUnidades">Converter Unidades</button>
+      <div id="resultadoConversaoUnidades" class="result"></div>
+    </div>
+
+    <!-- Painel Conversão Decimal → DMS -->
+    <div id="decimalDmsTab" class="calculator-panel">
+      <h3>Converter Decimal para DMS</h3>
+      <div class="form-grid">
+        <div class="input-group">
+          <label for="decimal_input">Valor Decimal</label>
+          <input type="number" id="decimal_input">
+        </div>
+      </div>
+      <button id="btn-decimal-dms" data-result="#resultadoDecimalDMS">Converter para DMS</button>
+      <div id="resultadoDecimalDMS" class="result"></div>
+    </div>
+
+    <!-- Painel Conversão DMS → Decimal -->
+    <div id="dmsDecimalTab" class="calculator-panel">
+      <h3>Converter DMS para Decimal</h3>
+      <div class="form-grid">
+        <div class="input-group">
+          <label for="dms_graus">Graus</label>
+          <input type="number" id="dms_graus">
+        </div>
+        <div class="input-group">
+          <label for="dms_minutos">Minutos</label>
+          <input type="number" id="dms_minutos">
+        </div>
+        <div class="input-group">
+          <label for="dms_segundos">Segundos</label>
+          <input type="number" id="dms_segundos">
+        </div>
+      </div>
+      <button id="btn-dms-decimal" data-result="#resultadoDMSDecimal">Converter para Decimal</button>
+      <div id="resultadoDMSDecimal" class="result"></div>
+    </div>
+  </div>
+
+  <script src="static/js/script.js"></script>
+</body>
+</html>

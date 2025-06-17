@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Calculadora Geográfica</title>
+  <link rel="stylesheet" href="static\css\style.css" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-content">
+        <h1>Calculadora Geográfica</h1>
+        <p class="tagline">Ferramentas de análise espacial com base em dados reais do Brasil</p>
+        <div class="global-datum">
+          <label for="datumGlobalSelect">Datum:</label>
+          <select id="datumGlobalSelect">
+            <option value="WGS84">WGS84</option>
+            <option value="SIRGAS2000">SIRGAS2000</option>
+            <option value="SAD69">SAD69</option>
+            <option value="CORREGO_ALEGRE">CORREGO_ALEGRE</option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navegação por abas -->
+    <nav class="tabs">
+      <button class="tab-button active" data-tab="distanciaTab">
+        <span class="material-icons-outlined">straighten</span>
+        Distância
+      </button>
+      <button class="tab-button" data-tab="areaTab">
+        <span class="material-icons-outlined">square_foot</span>
+        Área
+      </button>
+      <button class="tab-button" data-tab="azimuteTab">
+        <span class="material-icons-outlined">explore</span>
+        Azimute
+      </button>
+      <button class="tab-button" data-tab="utmTab">
+        <span class="material-icons-outlined">grid_view</span>
+        UTM
+      </button>
+      <button class="tab-button" data-tab="novasCoordenadasTab">
+        <span class="material-icons-outlined">navigation</span>
+        Novas Coordenadas
+      </button>
+      <button class="tab-button" data-tab="conversaoUnidadesTab">
+        <span class="material-icons-outlined">swap_horiz</span>
+        Conversão de Unidades
+      </button>
+      <button class="tab-button" data-tab="decimalDmsTab">
+        <span class="material-icons-outlined">settings_input_component</span>
+        Decimal → DMS
+      </button>
+      <button class="tab-button" data-tab="dmsDecimalTab">
+        <span class="material-icons-outlined">calculate</span>
+        DMS → Decimal
+      </button>
+    </nav>
+        <!-- Painel Distância -->
+        <div id="distanciaTab" class="calculator-panel active">
+            <h3>Calcular Distância Geodésica</h3>
+            <div class="form-grid">
+              <div class="input-group">
+                <label for="dist_lat1">Latitude 1</label>
+                <input type="number" id="dist_lat1" value="-0.814" />
+              </div>
+              <div class="input-group">
+                <label for="dist_lon1">Longitude 1</label>
+                <input type="number" id="dist_lon1" value="-66.003" />
+              </div>
+              <div class="input-group">
+                <label for="dist_lat2">Latitude 2</label>
+                <input type="number" id="dist_lat2" value="-0.954" />
+              </div>
+              <div class="input-group">
+                <label for="dist_lon2">Longitude 2</label>
+                <input type="number" id="dist_lon2" value="-49.888" />
+              </div>
+            </div>
+            <p class="example-note">
+              🔍 Exemplo: distância entre o ponto mais alto do Brasil e a foz do maior rio do mundo.
+            </p>
+            <p class="example-coords">
+              Lat/Long 1: Pico da Neblina (-0.814, -66.003)<br/>
+              Lat/Long 2: Foz do Amazonas (-0.954, -49.888)
+            </p>
+            <button data-result="#resultadoDistancia">Calcular Distância</button>
+            <div id="resultadoDistancia" class="result"></div>
+          </div>
+              <!-- Painel Área -->
+    <div id="areaTab" class="calculator-panel">
+        <h3>Calcular Área de Polígono (Triângulo)</h3>
+        <div class="form-grid">
+          <div class="input-group">
+            <label for="area_latA">Latitude A</label>
+            <input type="number" id="area_latA" value="-16.341" />
+          </div>
+          <div class="input-group">
+            <label for="area_lonA">Longitude A</label>
+            <input type="number" id="area_lonA" value="-56.620" />
+          </div>
+          <div class="input-group">
+            <label for="area_latB">Latitude B</label>
+            <input type="number" id="area_latB" value="-17.313" />
+          </div>
+          <div class="input-group">
+            <label for="area_lonB">Longitude B</label>
+            <input type="number" id="area_lonB" value="-56.792" />
+          </div>
+          <div class="input-group">
+            <label for="area_latC">Latitude C</label>
+            <input type="number" id="area_latC" value="-17.000" />
+          </div>
+          <div class="input-group">
+            <label for="area_lonC">Longitude C</label>
+            <input type="number" id="area_lonC" value="-55.865" />
+          </div>
+        </div>
+        <p class="example-note">📐 Exemplo: triângulo geográfico aproximando uma porção do Pantanal Norte (MT).</p>
+  <p class="example-coords">
+    Lat/Long A: (-16.341, -56.620)<br/>
+    Lat/Long B: (-17.313, -56.792)<br/>
+    Lat/Long C: (-17.000, -55.865)
+  </p>
+        <button data-result="#resultadoArea">Calcular Área</button>
+        <div id="resultadoArea" class="result"></div>
+      </div>
+          <!-- Painel Azimute -->
+    <div id="azimuteTab" class="calculator-panel">
+        <h3>Calcular Azimute</h3>
+        <div class="form-grid">
+          <div class="input-group">
+            <label for="azimute_lat1">Latitude 1</label>
+            <input type="number" id="azimute_lat1" value="-10.726" />
+          </div>
+          <div class="input-group">
+            <label for="azimute_lon1">Longitude 1</label>
+            <input type="number" id="azimute_lon1" value="-46.752" />
+          </div>
+          <div class="input-group">
+            <label for="azimute_lat2">Latitude 2</label>
+            <input type="number" id="azimute_lat2" value="5.226" />
+          </div>
+          <div class="input-group">
+            <label for="azimute_lon2">Longitude 2</label>
+            <input type="number" id="azimute_lon2" value="-60.752" />
+          </div>
+        </div>
+        <p class="example-note">🧭 Exemplo: direção geodésica das dunas do Jalapão até o extremo norte, o Monte Roraima.</p>
+<p class="example-coords">
+  Lat/Long 1: Jalapão (-10.726, -46.752)<br/>
+  Lat/Long 2: Monte Roraima (5.226, -60.752)
+</p>
+        <button data-result="#resultadoAzimute">Calcular Azimute</button>
+        <div id="resultadoAzimute" class="result"></div>
+      </div>
+          <!-- Painel UTM -->
+    <div id="utmTab" class="calculator-panel">
+        <h3>Converter Coordenadas Geográficas para UTM</h3>
+        <div class="form-grid">
+          <div class="input-group">
+            <label for="utm_lat">Latitude</label>
+            <input type="number" id="utm_lat" value="-12.467" />
+          </div>
+          <div class="input-group">
+            <label for="utm_lon">Longitude</label>
+            <input type="number" id="utm_lon" value="-41.420" />
+          </div>
+        </div>
+        <p class="example-note">🌐 Exemplo: próximo à Cachoeira da Fumaça, uma das maiores do Brasil, localizada na Bahia.</p>
+<p class="example-coords">
+  Lat/Long: (-12.467, -41.420)
+</p>
+        <button data-result="#resultadoUTM">Converter para UTM</button>
+        <div id="resultadoUTM" class="result"></div>
+      </div>
+          <!-- Painel Novas Coordenadas -->
+    <div id="novasCoordenadasTab" class="calculator-panel">
+        <h3>Calcular Novas Coordenadas</h3>
+        <div class="form-grid">
+          <div class="input-group">
+            <label for="novascoords_lat">Latitude Inicial</label>
+            <input type="number" id="novascoords_lat" value="-8.917" />
+          </div>
+          <div class="input-group">
+            <label for="novascoords_lon">Longitude Inicial</label>
+            <input type="number" id="novascoords_lon" value="-73.933" />
+          </div>
+          <div class="input-group">
+            <label for="novascoords_distancia">Distância (m)</label>
+            <input type="number" id="novascoords_distancia" value="100000" />
+          </div>
+          <div class="input-group">
+            <label for="novascoords_azimute">Azimute (°)</label>
+            <input type="number" id="novascoords_azimute" value="45" />
+          </div>
+        </div>
+        <p class="example-note">🧭 Exemplo: navegação de 100 km a nordeste saindo da fronteira do Acre com o Peru (Serra do Divisor).</p>
+<p class="example-coords">
+  Ponto inicial: (-8.917, -73.933)<br/>
+  Distância: 100.000 m<br/>
+  Azimute: 45°
+</p>
+        <button data-result="#resultadoNovasCoordenadas">Calcular Novas Coordenadas</button>
+        <div id="resultadoNovasCoordenadas" class="result"></div>
+      </div>
+
+<!-- Painel Conversão de Unidades -->
+<div id="conversaoUnidadesTab" class="calculator-panel">
+  <h3>Conversão de Unidades</h3>
+  <div class="form-grid">
+    <div class="input-group">
+      <label for="valorConversao">Valor</label>
+      <input type="number" id="valorConversao" />
+    </div>
+    <div class="input-group">
+      <label for="unidadeOrigem">Unidade Origem</label>
+      <select id="unidadeOrigem">
+        <option value="km">Quilômetros</option>
+        <option value="milhas">Milhas</option>
+        <option value="m_nauticas">Milhas Náuticas</option>
+        <option value="metros">Metros</option>
+        <option value="pes">Pés</option>
+        <option value="jardas">Jardas</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <label for="unidadeDestino">Unidade Destino</label>
+      <select id="unidadeDestino">
+        <option value="km">Quilômetros</option>
+        <option value="milhas">Milhas</option>
+        <option value="m_nauticas">Milhas Náuticas</option>
+        <option value="metros">Metros</option>
+        <option value="pes">Pés</option>
+        <option value="jardas">Jardas</option>
+      </select>
+    </div>
+  </div>
+  <p class="example-note">🔁 Exemplo: conversão de unidades métricas utilizadas em mapas e rotas.</p>
+  <p class="example-coords">
+    Valor: 10<br/>
+    Unidade Origem: km<br/>
+    Unidade Destino: milhas
+  </p>
+  <button data-result="#resultadoConversaoUnidades">Converter Unidades</button>
+  <div id="resultadoConversaoUnidades" class="result"></div>
+</div>
+
+          <!-- Painel Decimal → DMS -->
+    <div id="decimalDmsTab" class="calculator-panel">
+        <h3>Converter Decimal para DMS</h3>
+        <div class="form-grid">
+          <div class="input-group">
+            <label for="decimal_input">Valor Decimal (Latitude)</label>
+            <input type="number" id="decimal_input" value="-10.4136" />
+          </div>
+        </div>
+        <p class="example-note">📍 Exemplo: latitude da foz do Rio São Francisco, região entre Alagoas e Sergipe.</p>
+<p class="example-coords">
+  Valor decimal: -10.4136<br/>
+  Convertido para DMS: -10° 24' 49"
+</p>
+        <button id="btn-decimal-dms" data-result="#resultadoDecimalDMS">Converter para DMS</button>
+        <div id="resultadoDecimalDMS" class="result"></div>
+      </div>
+  
+      <!-- Painel DMS → Decimal -->
+      <div id="dmsDecimalTab" class="calculator-panel">
+        <h3>Converter DMS para Decimal</h3>
+        <div class="form-grid">
+          <div class="input-group">
+            <label for="dms_graus">Graus</label>
+            <input type="number" id="dms_graus" value="-10" />
+          </div>
+          <div class="input-group">
+            <label for="dms_minutos">Minutos</label>
+            <input type="number" id="dms_minutos" value="24" />
+          </div>
+          <div class="input-group">
+            <label for="dms_segundos">Segundos</label>
+            <input type="number" id="dms_segundos" value="49" />
+          </div>
+        </div>
+        <p class="example-note">📐 Exemplo: DMS equivalente à coordenada decimal -10.4136.</p>
+<p class="example-coords">
+  Graus: -10<br/>
+  Minutos: 24<br/>
+  Segundos: 49<br/>
+  Valor decimal resultante: -10.4136
+</p>
+        <button id="btn-dms-decimal" data-result="#resultadoDMSDecimal">Converter para Decimal</button>
+        <div id="resultadoDMSDecimal" class="result"></div>
+      </div>
+    </div> <!-- Fim do .container -->
+    <script src="static\js\script.js"></script>
+  </body>
+  </html>

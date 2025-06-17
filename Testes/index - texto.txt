@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Geodésica</title>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>IndiMapLab</h1>
+        <h2>Seu laboratório de experimentação geográfica digital</h2>
+        <p class="tagline">Ferramentas para cálculos e conversões geodésicas avançadas, direcionadas a <span class="area-geografica">geógrafos</span>, áreas correlatas e <span class="entusiasta">entusiastas da geografia brasileira</span>.</p>
+
+        <section class="calculator-section" id="distancia">
+            <h3>Cálculo de Distância Geodésica</h3>
+            <p class="description">Calcula a distância em linha reta entre dois pontos na superfície da Terra, considerando o <span class="conceito-geo">datum</span> geodésico selecionado e a curvatura terrestre. Ideal para analisar a extensão territorial entre <span class="exemplo-local">o Pico da Bandeira (MG/ES)</span> e <span class="exemplo-local">o Monte Roraima (RR)</span>.</p>
+            <div class="input-group">
+                <label for="lat1">Latitude do Ponto 1: <span class="exemplo-coordenada">(Ex: -20.5358 - Pico da Bandeira)</span></label>
+                <input type="number" id="lat1" required>
+            </div>
+            <div class="input-group">
+                <label for="lon1">Longitude do Ponto 1: <span class="exemplo-coordenada">(Ex: -41.7933 - Pico da Bandeira)</span></label>
+                <input type="number" id="lon1" required>
+            </div>
+            <div class="input-group">
+                <label for="lat2">Latitude do Ponto 2: <span class="exemplo-coordenada">(Ex: 5.2231 - Monte Roraima)</span></label>
+                <input type="number" id="lat2" required>
+            </div>
+            <div class="input-group">
+                <label for="lon2">Longitude do Ponto 2: <span class="exemplo-coordenada">(Ex: -60.7478 - Monte Roraima)</span></label>
+                <input type="number" id="lon2" required>
+            </div>
+            <div class="input-group">
+                <label for="datumSelect">Datum Geodésico:</label>
+                <select id="datumSelect">
+                    <option value="WGS84">WGS84 (<span class="sistema-referencia">Sistema de Referência Global</span>)</option>
+                    <option value="SIRGAS2000" selected>SIRGAS 2000 (<span class="sistema-referencia">Oficial para o Brasil</span>)</option>
+                    <option value="SAD69">SAD69 (<span class="sistema-referencia">Histórico no Brasil</span>)</option>
+                    <option value="CorregoAlegre">Córrego Alegre (<span class="sistema-referencia">Datum Local Histórico - Sudeste do Brasil</span>)</option>
+                </select>
+            </div>
+            <button onclick="calcularDistancia()">Calcular Distância</button>
+            <p id="resultadoDistancia" class="result"></p>
+        </section>
+
+        <section class="calculator-section" id="area">
+            <h3>Cálculo de Área de Poligonais</h3>
+            <p class="description">Estima a área de um polígono definido por três vértices, útil para calcular a extensão de <span class="area-de-estudo">áreas de estudo</span>, como um <span class="exemplo-poligono">triângulo representando a Ilha de Marajó (PA)</span>.</p>
+            <div class="input-group">
+                <label for="latA">Latitude do Vértice A: <span class="exemplo-vertice">(Ex: -0.5483 - Soure, Ilha de Marajó)</span></label>
+                <input type="number" id="latA" required step="any">
+            </div>
+            <div class="input-group">
+                <label for="lonA">Longitude do Vértice A: <span class="exemplo-vertice">(Ex: -48.5231 - Soure, Ilha de Marajó)</span></label>
+                <input type="number" id="lonA" required step="any">
+            </div>
+            <div class="input-group">
+                <label for="latB">Latitude do Vértice B: <span class="exemplo-vertice">(Ex: -0.9667 - Salvaterra, Ilha de Marajó)</span></label>
+                <input type="number" id="latB" required step="any">
+            </div>
+            <div class="input-group">
+                <label for="lonB">Longitude do Vértice B: <span class="exemplo-vertice">(Ex: -48.7167 - Salvaterra, Ilha de Marajó)</span></label>
+                <input type="number" id="lonB" required step="any">
+            </div>
+            <div class="input-group">
+                <label for="latC">Latitude do Vértice C: <span class="exemplo-vertice">(Ex: -0.1833 - Chaves, Ilha de Marajó)</span></label>
+                <input type="number" id="latC" required step="any">
+            </div>
+            <div class="input-group">
+                <label for="lonC">Longitude do Vértice C: <span class="exemplo-vertice">(Ex: -50.3333 - Chaves, Ilha de Marajó)</span></label>
+                <input type="number" id="lonC" required step="any">
+            </div>
+            <div class="input-group">
+                <label for="datum_area">Datum Geodésico:</label>
+                <select id="datum_area">
+                    <option value="WGS84">WGS84 (<span class="sistema-referencia">Sistema de Referência Global</span>)</option>
+                    <option value="SIRGAS2000" selected>SIRGAS 2000 (<span class="sistema-referencia">Oficial para o Brasil</span>)</option>
+                    <option value="SAD69">SAD69 (<span class="sistema-referencia">Histórico no Brasil</span>)</option>
+                    <option value="CorregoAlegre">Córrego Alegre (<span class="sistema-referencia">Datum Local Histórico - Sudeste do Brasil</span>)</option>
+                </select>
+            </div>
+            <button onclick="calcularArea()">Calcular Área</button>
+            <p id="resultadoArea" class="result"></p>
+        </section>
+
+        <section class="calculator-section" id="azimute">
+            <h3>Cálculo de Azimute e Distância</h3>
+            <p class="description">Determina o <span class="conceito-geo">azimute</span> para estudos de deslocamento entre importantes <span class="elemento-cartografico">pontos geográficos</span>, como a direção do <span class="exemplo-ponto">Farol da Barra (BA)</span> para o <span class="exemplo-ponto">Cristo Redentor (RJ)</span>.</p>
+            <div class="input-group">
+                <label for="azimute_latitude1">Latitude Inicial: <span class="exemplo-ponto">(Ex: -13.0067 - Farol da Barra)</span></label>
+                <input type="number" id="azimute_latitude1" required>
+            </div>
+            <div class="input-group">
+                <label for="azimute_longitude1">Longitude Inicial: <span class="exemplo-ponto">(Ex: -38.5389 - Farol da Barra)</span></label>
+                <input type="number" id="azimute_longitude1" required>
+            </div>
+            <div class="input-group">
+                <label for="azimute_latitude2">Latitude Final: <span class="exemplo-ponto">(Ex: -22.9519 - Cristo Redentor)</span></label>
+                <input type="number" id="azimute_latitude2" required>
+            </div>
+            <div class="input-group">
+                <label for="azimute_longitude2">Longitude Final: <span class="exemplo-ponto">(Ex: -43.2097 - Cristo Redentor)</span></label>
+                <input type="number" id="azimute_longitude2" required>
+            </div>
+            <div class="input-group">
+                <label for="datum_azimute">Datum Geodésico:</label>
+                <select id="datum_azimute">
+                    <option value="WGS84">WGS84 (<span class="sistema-referencia">Sistema de Referência Global</span>)</option>
+                    <option value="SIRGAS2000" selected>SIRGAS 2000 (<span class="sistema-referencia">Oficial para o Brasil</span>)</option>
+                    <option value="SAD69">SAD69 (<span class="sistema-referencia">Histórico no Brasil</span>)</option>
+                    <option value="CorregoAlegre">Córrego Alegre (<span class="sistema-referencia">Datum Local Histórico - Sudeste do Brasil</span>)</option>
+                </select>
+            </div>
+            <button onclick="calcularAzimute()">Calcular Azimute</button>
+            <p id="resultadoAzimute" class="result"></p>
+        </section>
+
+        <section class="calculator-section" id="utm">
+            <h3>Conversão para Coordenadas UTM</h3>
+            <p class="description">Transforma coordenadas geográficas em UTM, útil para referenciar áreas específicas em projetos de <span class="aplicacao-pratica">planejamento territorial no estado do Paraná</span>.</p>
+            <div class="input-group">
+                <label for="utm_lat">Latitude: <span class="exemplo-coordenada">(Ex: -25.4306 - Curitiba, PR)</span></label>
+                <input type="number" id="utm_lat" required>
+            </div>
+            <div class="input-group">
+                <label for="utm_lon">Longitude: <span class="exemplo-coordenada">(Ex: -49.2700 - Curitiba, PR)</span></label>
+                <input type="number" id="utm_lon" required>
+            </div>
+            <div class="input-group">
+                <label for="datum_utm">Datum Geodésico:</label>
+                <select id="datum_utm">
+                    <option value="WGS84">WGS84 (<span class="sistema-referencia">Sistema de Referência Global</span>)</option>
+                    <option value="SIRGAS2000" selected>SIRGAS 2000 (<span class="sistema-referencia">Oficial para o Brasil</span>)</option>
+                    <option value="SAD69">SAD69 (<span class="sistema-referencia">Histórico no Brasil</span>)</option>
+                    <option value="CorregoAlegre">Córrego Alegre (<span class="sistema-referencia">Datum Local Histórico - Sudeste do Brasil</span>)</option>
+                </select>
+            </div>
+            <button onclick="calcularUTM()">Converter para UTM</button>
+            <p id="resultadoUtm" class="result"></p>
+        </section>
+
+        <section class="calculator-section" id="novas-coordenadas">
+            <h3>Cálculo de Novas Coordenadas (Avançado)</h3>
+            <p class="description">Determina novas coordenadas a partir de um ponto inicial, distância e azimute, como o estudo de dispersão de espécies a partir do centro da <span class="elemento-urbano">Floresta da Tijuca (RJ)</span>.</p>
+            <div class="input-group">
+                <label for="lat">Latitude Inicial: <span class="exemplo-ponto">(Ex: -22.9667 - Floresta da Tijuca)</span></label>
+                <input type="number" id="lat" required>
+            </div>
+            <div class="input-group">
+                <label for="lon">Longitude Inicial: <span class="exemplo-ponto">(Ex: -43.2833 - Floresta da Tijuca)</span></label>
+                <input type="number" id="lon" required>
+            </div>
+            <div class="input-group">
+                <label for="distancia">Distância (metros): <span class="exemplo-distancia">(Ex: 7500 - 7.5 km)</span></label>
+                <input type="number" id="distancia" required>
+            </div>
+            <div class="input-group">
+                <label for="azimute">Azimute (graus): <span class="exemplo-angulo">(Ex: 60 - Nordeste)</span></label>
+                <input type="number" id="azimute" required>
+            </div>
+            <div class="input-group">
+                <label for="datum_novas_coords">Datum Geodésico:</label>
+                <select id="datum_novas_coords">
+                    <option value="WGS84">WGS84 (<span class="sistema-referencia">Sistema de Referência Global</span>)</option>
+                    <option value="SIRGAS2000" selected>SIRGAS 2000 (<span class="sistema-referencia">Oficial para o Brasil</span>)</option>
+                    <option value="SAD69">SAD69 (<span class="sistema-referencia">Histórico no Brasil</span>)</option>
+                    <option value="CorregoAlegre">Córrego Alegre (<span class="sistema-referencia">Datum Local Histórico - Sudeste do Brasil</span>)</option>
+                </select>
+            </div>
+            <button type="button" onclick="calcularNovasCoordenadas()">Calcular Novas Coordenadas</button>
+    <p id="resultadoNovasCoordenadas" class="result"></p>
+        </section>
+
+        <section class="calculator-section" id="conversao-unidades">
+            <h3>Conversão de Unidades de Distância</h3>
+            <p class="description">Permite converter valores entre diferentes unidades de medida de distância, útil ao analisar dados de diferentes fontes utilizados em estudos geográficos no <span class="pais">Brasil</span>.</p>
+            <div class="input-group">
+                <label for="valorConversao">Valor a Converter: <span class="exemplo-valor">(Ex: 150)</span></label>
+                <input type="number" id="valorConversao" required>
+            </div>
+            <div class="input-group">
+                <label for="unidadeOrigem">Unidade de Origem:</label>
+                <select id="unidadeOrigem">
+                    <option value="km">Quilômetro (<span class="abreviacao-unidade">km</span>)</option>
+                    <option value="milhas">Milha (<span class="abreviacao-unidade">mi</span>)</option>
+                    <option value="m_náuticas">Milha Náutica (<span class="abreviacao-unidade">MN</span>)</option>
+                    <option value="metros">Metro (<span class="abreviacao-unidade">m</span>)</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="unidadeDestino">Unidade de Destino:</label>
+                <select id="unidadeDestino">
+                    <option value="km">Quilômetro (<span class="abreviacao-unidade">km</span>)</option>
+                    <option value="milhas">Milha (<span class="abreviacao-unidade">mi</span>)</option>
+                    <option value="m_náuticas">Milha Náutica (<span class="abreviacao-unidade">MN</span>)</option>
+                    <option value="metros">Metro (<span class="abreviacao-unidade">m</span>)</option>
+            </div>
+                <button onclick="calcularConversao()">Converter Unidades</button>
+                <p id="resultadoConversao" class="result"></p
+        </section>
+
+        <section class="calculator-section" id="decimal-dms">
+                <h3>Conversão de Coordenadas Decimais para DMS</h3>
+                <p class="description">Converte coordenadas de graus decimais para Graus, Minutos e Segundos (<span class="formato-coordenada">DMS</span>), formato comum em mapas detalhados e sistemas de referência geográfica utilizados no <span class="contexto-cartografico">Brasil</span>.</p>
+            <div class="input-group">
+                    <label for="decimal">Valor Decimal: <span class="exemplo-decimal">(Ex: -15.7801 - Brasília)</span></label>
+                    <input type="number" id="decimal" required>
+            </div>
+                <button onclick="converterDecimalParaDMS()">Converter para DMS</button>
+                <p id="resultadoDMS" class="result"></p>
+        </section>
+            </div>
+
+    <!-- Link para o arquivo CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- Script para o arquivo JS -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

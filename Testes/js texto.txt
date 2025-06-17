@@ -1,0 +1,414 @@
+/**
+ * Aguarda o carregamento completo do DOM para garantir que todos os elementos HTML existam
+ * antes de adicionar os event listeners (escutadores de eventos).
+ */
+document.addEventListener('DOMContentLoaded', () => {
+
+    // ========================================================================
+    // 1. LÓGICA DE NAVEGAÇÃO POR ABAS
+    // ========================================================================
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const calculatorPanels = document.querySelectorAll('.calculator-panel');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            calculatorPanels.forEach(panel => panel.classList.remove('active'));
+            button.classList.add('active');
+            const targetPanel = document.getElementById(button.dataset.tab);
+            if (targetPanel) {
+                targetPanel.classList.add('active');
+            }
+        });
+    });
+});
+
+// 2. VINCULAR FUNÇÕES AOS BOTÕES (EVENT LISTENERS)
+// ========================================================================
+document.addEventListener('DOMContentLoaded', function() {
+    // Função para adicionar event listener com verificação de segurança
+    function addEventListenerSafe(selector, eventType, handler) {
+        const element = document.querySelector(selector);
+        if (element) {
+            element.addEventListener(eventType, handler);
+        } else {
+            console.error(`Elemento não encontrado: ${selector}`);
+        }
+    }
+
+    // Vincular event listeners para cada funcionalidade
+    addEventListenerSafe('#distancia button', 'click', handleDistancia);
+    addEventListenerSafe('#area button', 'click', handleArea);
+    addEventListenerSafe('#azimute button', 'click', handleAzimute);
+    addEventListenerSafe('#utm button', 'click', handleUTM);
+    addEventListenerSafe('#novas-coordenadas button', 'click', handleNovasCoordenadas);
+    addEventListenerSafe('#conversao-unidades button', 'click', handleConversaoUnidades);
+    
+    // Para conversões DMS - dois botões separados dentro do painel #decimal-dms
+    addEventListenerSafe('#btn-decimal-dms', 'click', handleDecimalParaDMS);
+    addEventListenerSafe('#btn-dms-decimal', 'click', handleDMSParaDecimal);
+
+    // Definir elementos de resultado globalmente para uso nas funções
+    window.resultElements = {
+        distancia: document.querySelector('#resultadoDistancia'),
+        area: document.querySelector('#resultadoArea'),
+        azimute: document.querySelector('#resultadoAzimute'),
+        utm: document.querySelector('#resultadoUTM'),
+        novasCoordenadas: document.querySelector('#resultadoNovasCoordenadas'),
+        conversaoUnidades: document.querySelector('#resultadoConversaoUnidades'),
+        decimalDms: document.querySelector('#resultadoDecimalDMS'),
+        dmsDecimal: document.querySelector('#resultadoDMSDecimal')
+    };
+});
+
+// ========================================================================
+// 3. FUNÇÃO CENTRAL PARA CHAMADAS À API (BACKEND)
+// ========================================================================
+async function apiRequest(endpoint, payload, button, resultElement) {
+    const originalButtonText = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = '<span class="loader"></span> Calculando...';
+    resultElement.innerHTML = ''; 
+
+    try {
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        
+        const data = await response.json();
+        
+        // Verificar se a resposta foi bem-sucedida
+        if (!response.ok || !data.success) {
+            throw new Error(data.error || `Erro HTTP ${response.status}`);
+        }
+        
+        return data;
+    } catch (error) {
+        console.error(`Erro na chamada para ${endpoint}:`, error);
+        resultElement.innerHTML = `<div class="error-message"><strong>Erro:</strong> ${error.message}</div>`;
+        throw error;
+    } finally {
+        button.disabled = false;
+        button.innerHTML = originalButtonText;
+    }
+}
+
+// ========================================================================
+// 4. FUNÇÕES AUXILIARES
+// ========================================================================
+
+const getInputValueAsFloat = (id) => {
+    const element = document.getElementById(id);
+    if (!element) {
+        throw new Error(`Elemento com ID '${id}' não encontrado`);
+    }
+    const value = parseFloat(element.value);
+    if (isNaN(value)) {
+        throw new Error(`Valor inválido para ${id}`);
+    }
+    return value;
+};
+
+const getInputValue = (id) => {
+    const element = document.getElementById(id);
+    if (!element) {
+        throw new Error(`Elemento com ID '${id}' não encontrado`);
+    }
+    return element.value.trim();
+};
+
+const getSelectedDatum = () => getInputValue("datumGlobalSelect");
+
+// Funções de formatação melhoradas
+const formatarNumero = (numero, casasDecimais = 2) => {
+    return numero.toLocaleString('pt-BR', { 
+        minimumFractionDigits: casasDecimais, 
+        maximumFractionDigits: casasDecimais 
+    });
+};
+
+const formatarDistancia = (metros) => {
+    if (metros >= 1000000) {
+        return `${formatarNumero(metros / 1000000, 3)} Mm (megametros)`;
+    } else if (metros >= 1000) {
+        return `${formatarNumero(metros / 1000, 3)} km`;
+    } else {
+        return `${formatarNumero(metros, 2)} m`;
+    }
+};
+
+const formatarArea = (m2) => {
+    if (m2 >= 1000000) {
+        return `${formatarNumero(m2 / 1000000, 6)} km²`;
+    } else if (m2 >= 10000) {
+        return `${formatarNumero(m2 / 10000, 4)} hectares`;
+    } else {
+        return `${formatarNumero(m2, 2)} m²`;
+    }
+};
+
+const formatarCoordenada = (coord, casasDecimais = 6) => {
+    return formatarNumero(coord, casasDecimais);
+};
+
+// Função genérica para tratar requisições
+const handleRequest = async (event, endpoint, payloadBuilder, responseFormatter) => {
+    const button = event.target;
+    const resultElement = button.nextElementSibling;
+    
+    try {
+        const payload = payloadBuilder();
+        
+        // Validação básica
+        if (typeof payload === 'object' && payload !== null) {
+            for (const [key, value] of Object.entries(payload)) {
+                if (typeof value === 'number' && isNaN(value)) {
+                    throw new Error(`Por favor, preencha o campo ${key} com um valor numérico válido.`);
+                }
+            }
+        }
+        
+        const data = await apiRequest(endpoint, payload, button, resultElement);
+        resultElement.innerHTML = responseFormatter(data);
+        
+    } catch (error) {
+        // Erro já tratado e exibido pela função apiRequest ou validação
+        console.error('Erro no handleRequest:', error);
+    }
+};
+
+// ========================================================================
+// 5. HANDLERS ESPECÍFICOS PARA CADA CALCULADORA
+// ========================================================================
+
+function handleDistancia(event) {
+    handleRequest(event, '/calcular_distancia', 
+        () => ({
+            lat1: getInputValueAsFloat('dist_lat1'),
+            lon1: getInputValueAsFloat('dist_lon1'),
+            lat2: getInputValueAsFloat('dist_lat2'),
+            lon2: getInputValueAsFloat('dist_lon2'),
+            datum: getSelectedDatum()
+        }),
+        (data) => {
+            return `
+                <div class="result-success">
+                    <h4>Resultado da Distância:</h4>
+                    <p><strong>Distância:</strong> ${formatarDistancia(data.distancia_metros)}</p>
+                    <p><strong>Azimute Direto:</strong> ${formatarNumero(data.azimute_direto, 4)}°</p>
+                    <p><strong>Azimute Inverso:</strong> ${formatarNumero(data.azimute_inverso, 4)}°</p>
+                    <p><strong>Datum:</strong> ${data.datum_usado}</p>
+                </div>
+            `;
+        }
+    );
+}
+
+function handleArea(event) {
+    handleRequest(event, '/calcular_area',
+        () => ({
+            latA: getInputValueAsFloat('area_latA'), 
+            lonA: getInputValueAsFloat('area_lonA'),
+            latB: getInputValueAsFloat('area_latB'), 
+            lonB: getInputValueAsFloat('area_lonB'),
+            latC: getInputValueAsFloat('area_latC'), 
+            lonC: getInputValueAsFloat('area_lonC'),
+            datum: getSelectedDatum()
+        }),
+        (data) => {
+            return `
+                <div class="result-success">
+                    <h4>Resultado da Área:</h4>
+                    <p><strong>Área:</strong> ${formatarArea(data.area_m2)}</p>
+                    <p><strong>Área (hectares):</strong> ${formatarNumero(data.area_hectares, 4)} ha</p>
+                    <p><strong>Perímetro:</strong> ${formatarDistancia(data.perimetro_m)}</p>
+                    <p><strong>Datum:</strong> ${data.datum_usado}</p>
+                </div>
+            `;
+        }
+    );
+}
+
+function handleAzimute(event) {
+    handleRequest(event, '/calcular_azimute',
+        () => ({
+            lat1: getInputValueAsFloat('azimute_lat1'), 
+            lon1: getInputValueAsFloat('azimute_lon1'),
+            lat2: getInputValueAsFloat('azimute_lat2'), 
+            lon2: getInputValueAsFloat('azimute_lon2'),
+            datum: getSelectedDatum()
+        }),
+        (data) => {
+            return `
+                <div class="result-success">
+                    <h4>Resultado do Azimute:</h4>
+                    <p><strong>Azimute Direto:</strong> ${formatarNumero(data.azimute_direto, 4)}°</p>
+                    <p><strong>Azimute Inverso:</strong> ${formatarNumero(data.azimute_inverso, 4)}°</p>
+                    <p><strong>Distância:</strong> ${formatarDistancia(data.distancia_m)}</p>
+                    <p><strong>Datum:</strong> ${data.datum_usado}</p>
+                </div>
+            `;
+        }
+    );
+}
+
+function handleUTM(event) {
+    handleRequest(event, '/calcular_utm',
+        () => ({
+            latitude: getInputValueAsFloat('utm_lat'),
+            longitude: getInputValueAsFloat('utm_lon'),
+            datum: getSelectedDatum()
+        }),
+        (data) => {
+            return `
+                <div class="result-success">
+                    <h4>Coordenadas UTM:</h4>
+                    <p><strong>Zona UTM:</strong> ${data.zona_utm} (${data.fuso})</p>
+                    <p><strong>Hemisfério:</strong> ${data.hemisferio}</p>
+                    <p><strong>Easting:</strong> ${formatarNumero(data.easting, 3)} m</p>
+                    <p><strong>Northing:</strong> ${formatarNumero(data.northing, 3)} m</p>
+                    <p><strong>EPSG:</strong> ${data.epsg_utm}</p>
+                    <p><strong>Datum:</strong> ${data.datum}</p>
+                </div>
+            `;
+        }
+    );
+}
+
+function handleNovasCoordenadas(event) {
+    handleRequest(event, '/calcular_novas_coordenadas',
+        () => ({
+            lat: getInputValueAsFloat('novascoords_lat'),
+            lon: getInputValueAsFloat('novascoords_lon'),
+            distancia: getInputValueAsFloat('novascoords_distancia'),
+            azimute: getInputValueAsFloat('novascoords_azimute'),
+            datum: getSelectedDatum()
+        }),
+        (data) => {
+            return `
+                <div class="result-success">
+                    <h4>Novas Coordenadas:</h4>
+                    <p><strong>Nova Latitude:</strong> ${formatarCoordenada(data.lat, 8)}</p>
+                    <p><strong>Nova Longitude:</strong> ${formatarCoordenada(data.lon, 8)}</p>
+                    <p><strong>Azimute Final:</strong> ${formatarNumero(data.azimute_final, 3)}°</p>
+                    <p><strong>Datum:</strong> ${data.datum_usado}</p>
+                </div>
+            `;
+        }
+    );
+}
+
+function handleConversaoUnidades(event) {
+    handleRequest(event, '/calcular_conversao',
+        () => ({
+            valor: getInputValueAsFloat('valorConversao'),
+            origem: getInputValue('unidadeOrigem'),
+            destino: getInputValue('unidadeDestino')
+        }),
+        (data) => {
+            const unidadeNomes = {
+                'km': 'quilômetros',
+                'milhas': 'milhas',
+                'm_nauticas': 'milhas náuticas',
+                'metros': 'metros',
+                'pes': 'pés',
+                'jardas': 'jardas'
+            };
+            
+            return `
+                <div class="result-success">
+                    <h4>Conversão de Unidades:</h4>
+                    <p><strong>Valor Original:</strong> ${formatarNumero(data.valor_original, 4)} ${unidadeNomes[data.unidade_origem] || data.unidade_origem}</p>
+                    <p><strong>Resultado:</strong> ${formatarNumero(data.resultado, 6)} ${unidadeNomes[data.unidade_destino] || data.unidade_destino}</p>
+                </div>
+            `;
+        }
+    );
+}
+
+function handleDecimalParaDMS(event) {
+    handleRequest(event, '/converter_decimal_para_dms',
+        () => ({
+            valorDecimal: getInputValueAsFloat('decimal_input')
+        }),
+        (data) => {
+            return `
+                <div class="result-success">
+                    <h4>Conversão Decimal → DMS:</h4>
+                    <p><strong>Valor Original:</strong> ${formatarCoordenada(data.valor_original, 8)}°</p>
+                    <p><strong>Resultado DMS:</strong> ${data.dms_formatado}</p>
+                    <p><strong>Componentes:</strong> ${data.graus}° ${data.minutos}' ${formatarNumero(data.segundos, 4)}"</p>
+                </div>
+            `;
+        }
+    );
+}
+
+function handleDMSParaDecimal(event) {
+    handleRequest(event, '/converter_dms_para_decimal',
+        () => ({
+            graus: getInputValueAsFloat('dms_graus'),
+            minutos: getInputValueAsFloat('dms_minutos'),
+            segundos: getInputValueAsFloat('dms_segundos')
+        }),
+        (data) => {
+            return `
+                <div class="result-success">
+                    <h4>Conversão DMS → Decimal:</h4>
+                    <p><strong>Componentes:</strong> ${data.componentes.graus}° ${data.componentes.minutos}' ${formatarNumero(data.componentes.segundos, 4)}"</p>
+                    <p><strong>Resultado Decimal:</strong> ${formatarCoordenada(data.resultado, 8)}°</p>
+                </div>
+            `;
+        }
+    );
+}
+
+// ========================================================================
+// 6. FUNÇÕES UTILITÁRIAS ADICIONAIS
+// ========================================================================
+
+// Função para copiar resultado para clipboard
+function copiarResultado(elemento) {
+    const texto = elemento.textContent;
+    navigator.clipboard.writeText(texto).then(() => {
+        // Feedback visual
+        elemento.style.backgroundColor = '#28a745';
+        setTimeout(() => {
+            elemento.style.backgroundColor = '';
+        }, 1000);
+    }).catch(err => {
+        console.error('Erro ao copiar texto: ', err);
+    });
+}
+
+// Função para validar coordenadas em tempo real
+function validarCoordenada(input, tipo) {
+    const valor = parseFloat(input.value);
+    const isLatitude = tipo === 'latitude';
+    const min = isLatitude ? -90 : -180;
+    const max = isLatitude ? 90 : 180;
+    
+    if (isNaN(valor)) {
+        input.setCustomValidity('Por favor, insira um número válido.');
+    } else if (valor < min || valor > max) {
+        input.setCustomValidity(`${tipo} deve estar entre ${min} e ${max}.`);
+    } else {
+        input.setCustomValidity('');
+    }
+}
+
+// Aplicar validação em tempo real nos campos de coordenadas
+document.addEventListener('DOMContentLoaded', () => {
+    const latitudeInputs = document.querySelectorAll('input[id*="lat"]');
+    const longitudeInputs = document.querySelectorAll('input[id*="lon"]');
+    
+    latitudeInputs.forEach(input => {
+        input.addEventListener('input', () => validarCoordenada(input, 'latitude'));
+    });
+    
+    longitudeInputs.forEach(input => {
+        input.addEventListener('input', () => validarCoordenada(input, 'longitude'));
+    });
+});
