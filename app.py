@@ -1,8 +1,15 @@
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 import pyproj
+from pyproj import datadir
+datadir.set_data_dir("/usr/share/proj")
 import math
 from typing import Dict, Any, Tuple, List, Optional
+import os
+
+# Se estiver usando variáveis de ambiente
+from dotenv import load_dotenv
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
@@ -450,5 +457,5 @@ def not_found(error):
 def method_not_allowed(error):
     return jsonify({'success': False, 'error': 'Método HTTP não permitido'}), 405
 
-if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+port = int(os.environ.get("PORT", 5000))  # Render usa uma porta aleatória via env
+app.run(host='0.0.0.0', port=port, debug=True)
